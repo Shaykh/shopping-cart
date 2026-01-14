@@ -1,3 +1,5 @@
+using Basket.Domain.Exceptions;
+
 namespace Basket.Domain.Tests;
 
 public class ShoppingCartTests
@@ -18,10 +20,10 @@ public class ShoppingCartTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Given_InvalidUserName_When_ConstructingShoppingCart_Then_ShouldThrowArgumentException(string? userName)
+    public void Given_InvalidUserName_When_ConstructingShoppingCart_Then_ShouldThrowInvalidUserNameException(string? userName)
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => new ShoppingCart(userName));
+        Assert.Throws<InvalidUserNameException>(() => new ShoppingCart(userName));
     }
 
     [Fact]
@@ -153,13 +155,13 @@ public class ShoppingCartTests
     }
 
     [Fact]
-    public void Given_Cart_When_RemovingItemWithEmptyProductId_Then_ShouldThrowArgumentException()
+    public void Given_Cart_When_RemovingItemWithEmptyProductId_Then_ShouldThrowInvalidProductIdException()
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => cart.RemoveItem(Guid.Empty));
+        Assert.Throws<InvalidProductIdException>(() => cart.RemoveItem(Guid.Empty));
     }
 
     [Fact]
@@ -178,23 +180,24 @@ public class ShoppingCartTests
     }
 
     [Fact]
-    public void Given_EmptyCart_When_UpdatingNonExistentItemQuantity_Then_ShouldThrowInvalidOperationException()
+    public void Given_EmptyCart_When_UpdatingNonExistentItemQuantity_Then_ShouldThrowCartItemNotFoundException()
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
+        var productId = Guid.NewGuid();
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => cart.UpdateItemQuantity(Guid.NewGuid(), 5));
+        Assert.Throws<CartItemNotFoundException>(() => cart.UpdateItemQuantity(productId, 5));
     }
 
     [Fact]
-    public void Given_Cart_When_UpdatingItemQuantityWithEmptyProductId_Then_ShouldThrowArgumentException()
+    public void Given_Cart_When_UpdatingItemQuantityWithEmptyProductId_Then_ShouldThrowInvalidProductIdException()
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => cart.UpdateItemQuantity(Guid.Empty, 5));
+        Assert.Throws<InvalidProductIdException>(() => cart.UpdateItemQuantity(Guid.Empty, 5));
     }
 
     [Fact]
@@ -279,5 +282,51 @@ public class ShoppingCartTests
 
         // Assert
         Assert.Equal(50.00m, cart.TotalPrice);
+    }
+
+    [Fact]
+    public void Given_ShoppingCart_When_CreatingCheckoutEvent_Then_ShouldCreateEventWithAllData()
+    {
+        // Arrange
+        var cart = new ShoppingCart("testuser");
+        cart.AddItem(new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2));
+        cart.AddItem(new CartItem(TestData.ProductId2, "Product 2", 15.00m, 3));
+
+        // Act
+        var checkoutEvent = cart.CreateCheckoutEvent(
+            firstName: "John",
+            lastName: "Doe",
+            emailAddress: "john.doe@example.com",
+            addressLine: "123 Main St",
+            country: "USA",
+            state: "CA",
+            zipCode: "12345",
+            cardName: "John Doe",
+            cardNumber: "1234567890123456",
+            expiration: "12/25",
+            cvv: "123",
+            paymentMethod: 1);
+
+        // Assert
+        Assert.NotNull(checkoutEvent);
+        Assert.Equal("testuser", checkoutEvent.UserName);
+        Assert.Equal(65.00m, checkoutEvent.TotalPrice); // (10*2) + (15*3) = 20 + 45 = 65
+        Assert.Equal("John", checkoutEvent.FirstName);
+        Assert.Equal("Doe", checkoutEvent.LastName);
+        Assert.Equal("john.doe@example.com", checkoutEvent.EmailAddress);
+        Assert.Equal(2, checkoutEvent.Items.Count);
+        Assert.Equal(TestData.ProductId1, checkoutEvent.Items[0].ProductId);
+        Assert.Equal(TestData.ProductId2, checkoutEvent.Items[1].ProductId);
+        Assert.True(checkoutEvent.OccurredOn <= DateTime.UtcNow);
+    }
+
+    [Fact]
+    public void Given_ShoppingCart_When_CheckingIsAggregateRoot_Then_ShouldImplementIAggregateRoot()
+    {
+        // Arrange
+        var cart = new ShoppingCart("testuser");
+
+        // Act & Assert
+        Assert.IsAssignableFrom<Common.IAggregateRoot>(cart);
     }
 }

@@ -20,8 +20,8 @@ public class ShoppingCartDtoValidatorTests
         var cart = new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>
-            {
+            Items =
+            [
                 new CartItemDto
                 {
                     ProductId = Guid.NewGuid(),
@@ -29,7 +29,7 @@ public class ShoppingCartDtoValidatorTests
                     Price = 10.00m,
                     Quantity = 2
                 }
-            }
+            ]
         };
 
         // Act
@@ -49,7 +49,7 @@ public class ShoppingCartDtoValidatorTests
         var cart = new ShoppingCartDto
         {
             UserName = userName!,
-            Items = new List<CartItemDto>()
+            Items = []
         };
 
         // Act
@@ -66,7 +66,7 @@ public class ShoppingCartDtoValidatorTests
         var cart = new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>()
+            Items = []
         };
 
         // Act
@@ -83,8 +83,8 @@ public class ShoppingCartDtoValidatorTests
         var cart = new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>
-            {
+            Items =
+            [
                 new CartItemDto
                 {
                     ProductId = Guid.Empty, // Invalid
@@ -92,7 +92,7 @@ public class ShoppingCartDtoValidatorTests
                     Price = 10.00m,
                     Quantity = 2
                 }
-            }
+            ]
         };
 
         // Act

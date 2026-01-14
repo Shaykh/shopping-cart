@@ -1,9 +1,13 @@
+using Basket.Domain.Common;
+using Basket.Domain.Events;
+using Basket.Domain.Exceptions;
+
 namespace Basket.Domain;
 
-public class ShoppingCart
+public class ShoppingCart : IAggregateRoot
 {
-    public string UserName { get; set; } = string.Empty;
-    public List<CartItem> Items { get; set; } = [];
+    public string UserName { get; private set; } = string.Empty;
+    public List<CartItem> Items { get; private set; } = [];
 
     public ShoppingCart()
     {
@@ -12,7 +16,7 @@ public class ShoppingCart
     public ShoppingCart(string userName)
     {
         if (string.IsNullOrWhiteSpace(userName))
-            throw new ArgumentException("User name cannot be null or empty.", nameof(userName));
+            throw new InvalidUserNameException();
 
         UserName = userName;
     }
@@ -21,8 +25,7 @@ public class ShoppingCart
 
     public void AddItem(CartItem item)
     {
-        if (item == null)
-            throw new ArgumentNullException(nameof(item));
+        ArgumentNullException.ThrowIfNull(item);
 
         var existingItem = Items.FirstOrDefault(x => x.ProductId == item.ProductId && x.Color == item.Color);
 
@@ -39,7 +42,7 @@ public class ShoppingCart
     public void RemoveItem(Guid productId, string? color = null)
     {
         if (productId == Guid.Empty)
-            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+            throw new InvalidProductIdException();
 
         var itemToRemove = Items.FirstOrDefault(x => x.ProductId == productId && x.Color == color);
 
@@ -52,13 +55,9 @@ public class ShoppingCart
     public void UpdateItemQuantity(Guid productId, int quantity, string? color = null)
     {
         if (productId == Guid.Empty)
-            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+            throw new InvalidProductIdException();
 
-        var item = Items.FirstOrDefault(x => x.ProductId == productId && x.Color == color);
-
-        if (item == null)
-            throw new InvalidOperationException($"Item with ProductId '{productId}' not found in cart.");
-
+        var item = Items.FirstOrDefault(x => x.ProductId == productId && x.Color == color) ?? throw new CartItemNotFoundException(productId);
         item.UpdateQuantity(quantity);
     }
 
@@ -68,4 +67,42 @@ public class ShoppingCart
     }
 
     public bool IsEmpty => Items.Count == 0;
+
+    public BasketCheckoutEvent CreateCheckoutEvent(
+        string firstName,
+        string lastName,
+        string emailAddress,
+        string addressLine,
+        string country,
+        string state,
+        string zipCode,
+        string cardName,
+        string cardNumber,
+        string expiration,
+        string cvv,
+        int paymentMethod)
+    {
+        return new BasketCheckoutEvent(
+            UserName: UserName,
+            TotalPrice: TotalPrice,
+            FirstName: firstName,
+            LastName: lastName,
+            EmailAddress: emailAddress,
+            AddressLine: addressLine,
+            Country: country,
+            State: state,
+            ZipCode: zipCode,
+            CardName: cardName,
+            CardNumber: cardNumber,
+            Expiration: expiration,
+            CVV: cvv,
+            PaymentMethod: paymentMethod,
+            Items: [.. Items.Select(item => new BasketCheckoutItem(
+                ProductId: item.ProductId,
+                ProductName: item.ProductName,
+                Price: item.Price,
+                Quantity: item.Quantity,
+                Color: item.Color))],
+            OccurredOn: DateTime.UtcNow);
+    }
 }

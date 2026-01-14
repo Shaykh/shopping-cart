@@ -25,8 +25,8 @@ public class CreateBasketCommandHandlerTests
         var basketDto = new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>
-            {
+            Items =
+            [
                 new CartItemDto
                 {
                     ProductId = TestData.ProductId1,
@@ -34,7 +34,7 @@ public class CreateBasketCommandHandlerTests
                     Price = 10.00m,
                     Quantity = 2
                 }
-            }
+            ]
         };
 
         var savedBasket = new ShoppingCart("testuser");
@@ -63,11 +63,11 @@ public class CreateBasketCommandHandlerTests
         var basketDto = new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>
-            {
+            Items =
+            [
                 new CartItemDto { ProductId = TestData.ProductId1, ProductName = "Product 1", Price = 10.00m, Quantity = 2 },
                 new CartItemDto { ProductId = TestData.ProductId2, ProductName = "Product 2", Price = 15.00m, Quantity = 3 }
-            }
+            ]
         };
 
         var savedBasket = new ShoppingCart("testuser");

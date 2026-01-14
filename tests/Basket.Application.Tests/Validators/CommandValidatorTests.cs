@@ -21,8 +21,8 @@ public class CreateBasketCommandValidatorTests
         var command = new CreateBasketCommand(new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>
-            {
+            Items =
+            [
                 new CartItemDto
                 {
                     ProductId = Guid.NewGuid(),
@@ -30,7 +30,7 @@ public class CreateBasketCommandValidatorTests
                     Price = 10.00m,
                     Quantity = 2
                 }
-            }
+            ]
         });
 
         // Act
@@ -70,7 +70,7 @@ public class UpdateBasketCommandValidatorTests
         var command = new UpdateBasketCommand(new ShoppingCartDto
         {
             UserName = "testuser",
-            Items = new List<CartItemDto>()
+            Items = []
         });
 
         // Act

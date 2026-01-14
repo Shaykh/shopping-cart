@@ -1,12 +1,14 @@
+using Basket.Domain.Exceptions;
+
 namespace Basket.Domain;
 
 public class CartItem
 {
-    public Guid ProductId { get; set; }
-    public string ProductName { get; set; } = string.Empty;
-    public decimal Price { get; set; }
-    public int Quantity { get; set; }
-    public string? Color { get; set; }
+    public Guid ProductId { get; private set; }
+    public string ProductName { get; private set; } = string.Empty;
+    public decimal Price { get; private set; }
+    public int Quantity { get; private set; }
+    public string? Color { get; private set; }
 
     public decimal TotalPrice => Price * Quantity;
 
@@ -17,16 +19,16 @@ public class CartItem
     public CartItem(Guid productId, string productName, decimal price, int quantity, string? color = null)
     {
         if (productId == Guid.Empty)
-            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+            throw new InvalidProductIdException();
 
         if (string.IsNullOrWhiteSpace(productName))
-            throw new ArgumentException("Product name cannot be null or empty.", nameof(productName));
+            throw new InvalidProductNameException();
 
         if (price < 0)
-            throw new ArgumentException("Price cannot be negative.", nameof(price));
+            throw new InvalidPriceException();
 
         if (quantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+            throw new InvalidQuantityException();
 
         ProductId = productId;
         ProductName = productName;
@@ -38,7 +40,7 @@ public class CartItem
     public void UpdateQuantity(int newQuantity)
     {
         if (newQuantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero.", nameof(newQuantity));
+            throw new InvalidQuantityException();
 
         Quantity = newQuantity;
     }
@@ -46,7 +48,7 @@ public class CartItem
     public void IncreaseQuantity(int amount)
     {
         if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+            throw new InvalidQuantityException();
 
         Quantity += amount;
     }
@@ -54,10 +56,10 @@ public class CartItem
     public void DecreaseQuantity(int amount)
     {
         if (amount <= 0)
-            throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
+            throw new InvalidQuantityException();
 
         if (Quantity - amount < 0)
-            throw new InvalidOperationException("Cannot decrease quantity below zero.");
+            throw new InvalidQuantityOperationException("Cannot decrease quantity below zero.");
 
         Quantity -= amount;
     }
