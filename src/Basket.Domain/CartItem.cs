@@ -1,13 +1,23 @@
+using System.Text.Json.Serialization;
 using Basket.Domain.Exceptions;
 
 namespace Basket.Domain;
 
 public class CartItem
 {
+    [JsonInclude]
     public Guid ProductId { get; private set; }
+
+    [JsonInclude]
     public string ProductName { get; private set; } = string.Empty;
+
+    [JsonInclude]
     public decimal Price { get; private set; }
+
+    [JsonInclude]
     public int Quantity { get; private set; }
+
+    [JsonInclude]
     public string? Color { get; private set; }
 
     public decimal TotalPrice => Price * Quantity;

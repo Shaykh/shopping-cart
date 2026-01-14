@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Basket.Domain.Common;
 using Basket.Domain.Events;
 using Basket.Domain.Exceptions;
@@ -6,7 +7,10 @@ namespace Basket.Domain;
 
 public class ShoppingCart : IAggregateRoot
 {
+    [JsonInclude]
     public string UserName { get; private set; } = string.Empty;
+
+    [JsonInclude]
     public List<CartItem> Items { get; private set; } = [];
 
     public ShoppingCart()
