@@ -1,6 +1,6 @@
-# 🛒 Basket Microservice - .NET 9
+# 🛒 Basket Microservice - .NET 10
 
-[![.NET 9](https://img.shields.io/badge/.NET-9.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/9.0)
+[![.NET 10](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/10.0)
 [![Redis](https://img.shields.io/badge/Cache-Redis-red.svg)](https://redis.io/)
 [![RabbitMQ](https://img.shields.io/badge/Messaging-RabbitMQ-orange.svg)](https://www.rabbitmq.com/)
 
@@ -17,7 +17,7 @@ Le service suit les principes de la **Clean Architecture** et du pattern **CQRS*
 
 ## 🚀 Stack Technique
 
-* **Framework :** ASP.NET Core 9
+* **Framework :** ASP.NET Core 10
 * **Cache :** Redis (StackExchange.Redis)
 * **Bus de Messages :** MassTransit + RabbitMQ
 * **Communication Synchrone :** gRPC (intégration avec le service Discount)
@@ -29,7 +29,7 @@ Le service suit les principes de la **Clean Architecture** et du pattern **CQRS*
 ### Prérequis
 
 * Docker Desktop
-* .NET 9 SDK
+* .NET 10 SDK
 
 ### 1. Lancer l'infrastructure (Redis & RabbitMQ)
 
