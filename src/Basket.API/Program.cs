@@ -1,41 +1,78 @@
+using Basket.Application;
+using Basket.Infrastructure;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
 
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    Log.Information("Starting Basket API");
+
+    // Use Serilog for logging
+    builder.Host.UseSerilog();
+
+    // Add services to the container
+    builder.Services.AddControllers();
+    builder.Services.AddEndpointsApiExplorer();
+    builder.Services.AddSwaggerGen();
+
+    // Add Application layer
+    builder.Services.AddApplication();
+
+    // Add Infrastructure layer
+    builder.Services.AddInfrastructure(builder.Configuration);
+
+    // Add Health Checks
+    builder.Services.AddHealthChecks()
+        .AddRedis(
+            redisConnectionString: builder.Configuration.GetSection("CacheSettings:ConnectionString").Value!,
+            name: "redis",
+            tags: ["redis", "cache"]);
+
+    var app = builder.Build();
+
+    // Configure the HTTP request pipeline
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Basket API v1");
+            c.RoutePrefix = "swagger";
+        });
+    }
+
+    app.UseHttpsRedirection();
+
+    // Add global exception handler
+    app.UseMiddleware<Basket.API.Middleware.GlobalExceptionHandlerMiddleware>();
+
+    app.UseAuthorization();
+    app.MapControllers();
+
+    // Health Check endpoint
+    app.MapHealthChecks("/hc", new HealthCheckOptions
+    {
+        Predicate = _ => true,
+        ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+    });
+
+    Log.Information("Basket API is running...");
+    await app.RunAsync();
 }
-
-app.UseHttpsRedirection();
-
-var summaries = new[]
+catch (Exception ex)
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
-
-app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
+    Log.CloseAndFlush();
 }

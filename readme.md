@@ -13,16 +13,16 @@ Le service suit les principes de la **Clean Architecture** et du pattern **CQRS*
 * **Basket.API** : Point d'entrée (Endpoints, Swagger, Middlewares).
 * **Basket.Application** : Logique de gestion (Commands/Queries, MediatR, FluentValidation).
 * **Basket.Domain** : Entités métier pures (ShoppingCart, CartItem).
-* **Basket.Infrastructure** : Persistence Redis, Clients gRPC (Discount) et Communication EventBus.
+* **Basket.Infrastructure** : Persistence Redis et Communication EventBus.
 
 ## 🚀 Stack Technique
 
 * **Framework :** ASP.NET Core 10
 * **Cache :** Redis (StackExchange.Redis)
 * **Bus de Messages :** MassTransit + RabbitMQ
-* **Communication Synchrone :** gRPC (intégration avec le service Discount)
 * **Validation :** FluentValidation
-* **Mapping :** Mapster
+* **Logging :** Serilog (Console + File)
+* **Health Checks :** ASP.NET Core Health Checks
 
 ## 🛠️ Installation & Démarrage
 
@@ -65,10 +65,29 @@ Modifiez le fichier `appsettings.json` pour pointer vers vos services :
     "ConnectionString": "localhost:6379"
   },
   "EventBusSettings": {
-    "HostAddress": "rabbitmq://localhost"
+    "HostAddress": "rabbitmq://localhost",
+    "Username": "",
+    "Password": ""
   },
-  "GrpcSettings": {
-    "DiscountUrl": "http://localhost:5003"
+  "Serilog": {
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.AspNetCore": "Warning"
+      }
+    },
+    "WriteTo": [
+      { "Name": "Console" },
+      {
+        "Name": "File",
+        "Args": {
+          "path": "logs/basket-.log",
+          "rollingInterval": "Day",
+          "retainedFileCountLimit": 7
+        }
+      }
+    ]
   }
 }
 ```
