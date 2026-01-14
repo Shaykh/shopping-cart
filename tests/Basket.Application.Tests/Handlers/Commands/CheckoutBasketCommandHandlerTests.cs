@@ -1,4 +1,5 @@
 using Basket.Application.Commands;
+using Basket.Application.Common.Interfaces;
 using Basket.Application.DTOs;
 using Basket.Application.Handlers.Commands;
 using Basket.Application.Repositories;
@@ -10,12 +11,14 @@ namespace Basket.Application.Tests.Handlers.Commands;
 public class CheckoutBasketCommandHandlerTests
 {
     private readonly Mock<IBasketRepository> _mockRepository;
+    private readonly Mock<IEventBus> _mockEventBus;
     private readonly CheckoutBasketCommandHandler _handler;
 
     public CheckoutBasketCommandHandlerTests()
     {
         _mockRepository = new Mock<IBasketRepository>();
-        _handler = new CheckoutBasketCommandHandler(_mockRepository.Object);
+        _mockEventBus = new Mock<IEventBus>();
+        _handler = new CheckoutBasketCommandHandler(_mockRepository.Object, _mockEventBus.Object);
     }
 
     [Fact]
@@ -56,6 +59,7 @@ public class CheckoutBasketCommandHandlerTests
         // Assert
         Assert.True(result);
         _mockRepository.Verify(x => x.GetBasketAsync(userName), Times.Once);
+        _mockEventBus.Verify(x => x.PublishAsync(It.IsAny<Basket.Domain.Events.BasketCheckoutEvent>(), It.IsAny<CancellationToken>()), Times.Once);
         _mockRepository.Verify(x => x.DeleteBasketAsync(userName), Times.Once);
     }
 
