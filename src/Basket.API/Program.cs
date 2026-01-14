@@ -21,7 +21,23 @@ try
     // Add services to the container
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        // Include XML comments
+        var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+        var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+        if (File.Exists(xmlPath))
+        {
+            c.IncludeXmlComments(xmlPath);
+        }
+
+        // Use camelCase for JSON properties
+        c.UseAllOfToExtendReferenceSchemas();
+        c.SupportNonNullableReferenceTypes();
+
+        // Enable annotations
+        c.EnableAnnotations();
+    });
 
     // Add Application layer
     builder.Services.AddApplication();
