@@ -6,10 +6,11 @@ public class CartItemTests
     public void Given_ValidParameters_When_ConstructingCartItem_Then_ShouldCreateCartItem()
     {
         // Arrange & Act
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2, "Red");
+        var productId = Guid.NewGuid();
+        var cartItem = new CartItem(productId, "Product Name", 10.50m, 2, "Red");
 
         // Assert
-        Assert.Equal("product-1", cartItem.ProductId);
+        Assert.Equal(productId, cartItem.ProductId);
         Assert.Equal("Product Name", cartItem.ProductName);
         Assert.Equal(10.50m, cartItem.Price);
         Assert.Equal(2, cartItem.Quantity);
@@ -20,21 +21,19 @@ public class CartItemTests
     public void Given_ValidParametersWithoutColor_When_ConstructingCartItem_Then_ShouldCreateCartItem()
     {
         // Arrange & Act
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var productId = Guid.NewGuid();
+        var cartItem = new CartItem(productId, "Product Name", 10.50m, 2);
 
         // Assert
-        Assert.Equal("product-1", cartItem.ProductId);
+        Assert.Equal(productId, cartItem.ProductId);
         Assert.Null(cartItem.Color);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Given_InvalidProductId_When_ConstructingCartItem_Then_ShouldThrowArgumentException(string? productId)
+    [Fact]
+    public void Given_EmptyProductId_When_ConstructingCartItem_Then_ShouldThrowArgumentException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => new CartItem(productId, "Product Name", 10.50m, 2));
+        Assert.Throws<ArgumentException>(() => new CartItem(Guid.Empty, "Product Name", 10.50m, 2));
     }
 
     [Theory]
@@ -44,14 +43,14 @@ public class CartItemTests
     public void Given_InvalidProductName_When_ConstructingCartItem_Then_ShouldThrowArgumentException(string? productName)
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => new CartItem("product-1", productName, 10.50m, 2));
+        Assert.Throws<ArgumentException>(() => new CartItem(Guid.NewGuid(), productName, 10.50m, 2));
     }
 
     [Fact]
     public void Given_NegativePrice_When_ConstructingCartItem_Then_ShouldThrowArgumentException()
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => new CartItem("product-1", "Product Name", -10.50m, 2));
+        Assert.Throws<ArgumentException>(() => new CartItem(Guid.NewGuid(), "Product Name", -10.50m, 2));
     }
 
     [Theory]
@@ -60,14 +59,14 @@ public class CartItemTests
     public void Given_InvalidQuantity_When_ConstructingCartItem_Then_ShouldThrowArgumentException(int quantity)
     {
         // Arrange, Act & Assert
-        Assert.Throws<ArgumentException>(() => new CartItem("product-1", "Product Name", 10.50m, quantity));
+        Assert.Throws<ArgumentException>(() => new CartItem(Guid.NewGuid(), "Product Name", 10.50m, quantity));
     }
 
     [Fact]
     public void Given_CartItemWithPriceAndQuantity_When_GettingTotalPrice_Then_ShouldCalculateCorrectly()
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 3);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 3);
 
         // Act
         var totalPrice = cartItem.TotalPrice;
@@ -80,7 +79,7 @@ public class CartItemTests
     public void Given_CartItem_When_UpdatingQuantityWithValidValue_Then_ShouldUpdateQuantity()
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 2);
 
         // Act
         cartItem.UpdateQuantity(5);
@@ -95,7 +94,7 @@ public class CartItemTests
     public void Given_CartItem_When_UpdatingQuantityWithInvalidValue_Then_ShouldThrowArgumentException(int quantity)
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 2);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => cartItem.UpdateQuantity(quantity));
@@ -105,7 +104,7 @@ public class CartItemTests
     public void Given_CartItem_When_IncreasingQuantityWithValidAmount_Then_ShouldIncreaseQuantity()
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 2);
 
         // Act
         cartItem.IncreaseQuantity(3);
@@ -120,7 +119,7 @@ public class CartItemTests
     public void Given_CartItem_When_IncreasingQuantityWithInvalidAmount_Then_ShouldThrowArgumentException(int amount)
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 2);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => cartItem.IncreaseQuantity(amount));
@@ -130,7 +129,7 @@ public class CartItemTests
     public void Given_CartItem_When_DecreasingQuantityWithValidAmount_Then_ShouldDecreaseQuantity()
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 5);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 5);
 
         // Act
         cartItem.DecreaseQuantity(2);
@@ -143,7 +142,7 @@ public class CartItemTests
     public void Given_CartItem_When_DecreasingQuantityThatWouldResultInNegative_Then_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 2);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 2);
 
         // Act & Assert
         Assert.Throws<InvalidOperationException>(() => cartItem.DecreaseQuantity(5));
@@ -155,7 +154,7 @@ public class CartItemTests
     public void Given_CartItem_When_DecreasingQuantityWithInvalidAmount_Then_ShouldThrowArgumentException(int amount)
     {
         // Arrange
-        var cartItem = new CartItem("product-1", "Product Name", 10.50m, 5);
+        var cartItem = new CartItem(Guid.NewGuid(), "Product Name", 10.50m, 5);
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => cartItem.DecreaseQuantity(amount));

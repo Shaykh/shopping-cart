@@ -2,7 +2,7 @@ namespace Basket.Domain;
 
 public class CartItem
 {
-    public string ProductId { get; set; } = string.Empty;
+    public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public int Quantity { get; set; }
@@ -14,17 +14,17 @@ public class CartItem
     {
     }
 
-    public CartItem(string productId, string productName, decimal price, int quantity, string? color = null)
+    public CartItem(Guid productId, string productName, decimal price, int quantity, string? color = null)
     {
-        if (string.IsNullOrWhiteSpace(productId))
-            throw new ArgumentException("Product ID cannot be null or empty.", nameof(productId));
-        
+        if (productId == Guid.Empty)
+            throw new ArgumentException("Product ID cannot be empty.", nameof(productId));
+
         if (string.IsNullOrWhiteSpace(productName))
             throw new ArgumentException("Product name cannot be null or empty.", nameof(productName));
-        
+
         if (price < 0)
             throw new ArgumentException("Price cannot be negative.", nameof(price));
-        
+
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
 
@@ -39,7 +39,7 @@ public class CartItem
     {
         if (newQuantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(newQuantity));
-        
+
         Quantity = newQuantity;
     }
 
@@ -47,7 +47,7 @@ public class CartItem
     {
         if (amount <= 0)
             throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
-        
+
         Quantity += amount;
     }
 
@@ -55,10 +55,10 @@ public class CartItem
     {
         if (amount <= 0)
             throw new ArgumentException("Amount must be greater than zero.", nameof(amount));
-        
+
         if (Quantity - amount < 0)
             throw new InvalidOperationException("Cannot decrease quantity below zero.");
-        
+
         Quantity -= amount;
     }
 }

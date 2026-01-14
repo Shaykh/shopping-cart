@@ -39,7 +39,7 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item = new CartItem("product-1", "Product 1", 10.00m, 1);
+        var item = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1);
 
         // Act
         cart.AddItem(item);
@@ -53,14 +53,14 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item = new CartItem("product-1", "Product 1", 10.00m, 1);
+        var item = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1);
 
         // Act
         cart.AddItem(item);
 
         // Assert
         Assert.Single(cart.Items);
-        Assert.Equal("product-1", cart.Items[0].ProductId);
+        Assert.Equal(TestData.ProductId1, cart.Items[0].ProductId);
     }
 
     [Fact]
@@ -78,8 +78,8 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item1 = new CartItem("product-1", "Product 1", 10.00m, 2);
-        var item2 = new CartItem("product-1", "Product 1", 10.00m, 3);
+        var item1 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2);
+        var item2 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 3);
 
         // Act
         cart.AddItem(item1);
@@ -95,8 +95,8 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item1 = new CartItem("product-1", "Product 1", 10.00m, 2, "Red");
-        var item2 = new CartItem("product-1", "Product 1", 10.00m, 3, "Blue");
+        var item1 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2, "Red");
+        var item2 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 3, "Blue");
 
         // Act
         cart.AddItem(item1);
@@ -111,11 +111,11 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item = new CartItem("product-1", "Product 1", 10.00m, 1);
+        var item = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1);
         cart.AddItem(item);
 
         // Act
-        cart.RemoveItem("product-1");
+        cart.RemoveItem(TestData.ProductId1);
 
         // Assert
         Assert.Empty(cart.Items);
@@ -128,7 +128,7 @@ public class ShoppingCartTests
         var cart = new ShoppingCart("testuser");
 
         // Act
-        cart.RemoveItem("non-existent");
+        cart.RemoveItem(Guid.NewGuid());
 
         // Assert
         Assert.Empty(cart.Items);
@@ -139,30 +139,27 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item1 = new CartItem("product-1", "Product 1", 10.00m, 1, "Red");
-        var item2 = new CartItem("product-1", "Product 1", 10.00m, 1, "Blue");
+        var item1 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1, "Red");
+        var item2 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1, "Blue");
         cart.AddItem(item1);
         cart.AddItem(item2);
 
         // Act
-        cart.RemoveItem("product-1", "Red");
+        cart.RemoveItem(TestData.ProductId1, "Red");
 
         // Assert
         Assert.Single(cart.Items);
         Assert.Equal("Blue", cart.Items[0].Color);
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Given_Cart_When_RemovingItemWithInvalidProductId_Then_ShouldThrowArgumentException(string? productId)
+    [Fact]
+    public void Given_Cart_When_RemovingItemWithEmptyProductId_Then_ShouldThrowArgumentException()
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => cart.RemoveItem(productId));
+        Assert.Throws<ArgumentException>(() => cart.RemoveItem(Guid.Empty));
     }
 
     [Fact]
@@ -170,11 +167,11 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item = new CartItem("product-1", "Product 1", 10.00m, 2);
+        var item = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2);
         cart.AddItem(item);
 
         // Act
-        cart.UpdateItemQuantity("product-1", 5);
+        cart.UpdateItemQuantity(TestData.ProductId1, 5);
 
         // Assert
         Assert.Equal(5, cart.Items[0].Quantity);
@@ -187,20 +184,17 @@ public class ShoppingCartTests
         var cart = new ShoppingCart("testuser");
 
         // Act & Assert
-        Assert.Throws<InvalidOperationException>(() => cart.UpdateItemQuantity("non-existent", 5));
+        Assert.Throws<InvalidOperationException>(() => cart.UpdateItemQuantity(Guid.NewGuid(), 5));
     }
 
-    [Theory]
-    [InlineData(null)]
-    [InlineData("")]
-    [InlineData("   ")]
-    public void Given_Cart_When_UpdatingItemQuantityWithInvalidProductId_Then_ShouldThrowArgumentException(string? productId)
+    [Fact]
+    public void Given_Cart_When_UpdatingItemQuantityWithEmptyProductId_Then_ShouldThrowArgumentException()
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => cart.UpdateItemQuantity(productId, 5));
+        Assert.Throws<ArgumentException>(() => cart.UpdateItemQuantity(Guid.Empty, 5));
     }
 
     [Fact]
@@ -208,13 +202,13 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        var item1 = new CartItem("product-1", "Product 1", 10.00m, 2, "Red");
-        var item2 = new CartItem("product-1", "Product 1", 10.00m, 3, "Blue");
+        var item1 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2, "Red");
+        var item2 = new CartItem(TestData.ProductId1, "Product 1", 10.00m, 3, "Blue");
         cart.AddItem(item1);
         cart.AddItem(item2);
 
         // Act
-        cart.UpdateItemQuantity("product-1", 5, "Red");
+        cart.UpdateItemQuantity(TestData.ProductId1, 5, "Red");
 
         // Assert
         var redItem = cart.Items.First(x => x.Color == "Red");
@@ -227,8 +221,8 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        cart.AddItem(new CartItem("product-1", "Product 1", 10.00m, 1));
-        cart.AddItem(new CartItem("product-2", "Product 2", 20.00m, 2));
+        cart.AddItem(new CartItem(TestData.ProductId1, "Product 1", 10.00m, 1));
+        cart.AddItem(new CartItem(TestData.ProductId2, "Product 2", 20.00m, 2));
 
         // Act
         cart.Clear();
@@ -253,7 +247,7 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        cart.AddItem(new CartItem("product-1", "Product 1", 10.00m, 2));
+        cart.AddItem(new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2));
 
         // Act & Assert
         Assert.Equal(20.00m, cart.TotalPrice);
@@ -264,9 +258,9 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        cart.AddItem(new CartItem("product-1", "Product 1", 10.00m, 2));
-        cart.AddItem(new CartItem("product-2", "Product 2", 15.00m, 3));
-        cart.AddItem(new CartItem("product-3", "Product 3", 5.00m, 1));
+        cart.AddItem(new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2));
+        cart.AddItem(new CartItem(TestData.ProductId2, "Product 2", 15.00m, 3));
+        cart.AddItem(new CartItem(TestData.ProductId3, "Product 3", 5.00m, 1));
 
         // Act & Assert
         // Expected: (10 * 2) + (15 * 3) + (5 * 1) = 20 + 45 + 5 = 70
@@ -278,10 +272,10 @@ public class ShoppingCartTests
     {
         // Arrange
         var cart = new ShoppingCart("testuser");
-        cart.AddItem(new CartItem("product-1", "Product 1", 10.00m, 2));
+        cart.AddItem(new CartItem(TestData.ProductId1, "Product 1", 10.00m, 2));
 
         // Act
-        cart.UpdateItemQuantity("product-1", 5);
+        cart.UpdateItemQuantity(TestData.ProductId1, 5);
 
         // Assert
         Assert.Equal(50.00m, cart.TotalPrice);
